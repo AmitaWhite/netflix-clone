@@ -11,17 +11,6 @@ spring:
     multipart:
       max-file-size: 2GB
       max-request-size: 2GB
-
-  # AWS Configuration
-  cloud:
-    aws:
-      credentials:
-        access-key: ${AWS_ACCESS_KEY:my-access-key}
-        secret-key: ${AWS_SECRET_KEY:my-secret-key}
-    region:
-      static: ${AWS_REGION:my-region}
-    s3:
-      bucket-name:
 server:
   port: 8082
 
@@ -32,3 +21,10 @@ management:
       exposure:
         include:
           - health,info
+#AWS Configuration
+aws:
+  access-key: ${AWS_ACCESS_KEY:my-access-key}
+  secret-key: ${AWS_SECRET_KEY:my-secret-key}
+  region: ${AWS_REGION:my-region}
+  s3:
+  bucket-name: ${AWS_BUCKET_NAME:abcdbucket}
