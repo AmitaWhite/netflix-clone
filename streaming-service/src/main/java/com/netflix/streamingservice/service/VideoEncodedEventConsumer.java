@@ -24,7 +24,7 @@ public class VideoEncodedEventConsumer {
      * This allows StreamingService to quickly find the playlist key by movieId.
      */
 
-    @KafkaListener(topics = "video.encoded", groupId = "streaming.service-group")
+    @KafkaListener(topics = "video.encoded", groupId = "streaming-service-group")
     public void consumeVideoEncoded(VideoEncodedEvent event) {
         log.info("Consumed VideoEncodedEvent for movie : {} success : {}", event.getMovieId(), event.isSuccess());
 

@@ -13,6 +13,7 @@ import com.netflix.videoservice.service.VideoService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
 @RequestMapping("/api/v1/videos")
@@ -32,6 +33,7 @@ public class VideoController {
      * POST /api/v1/videos/upload/{movieId}
      */
 
+    @PostMapping("/upload/{movieId}")
     public ResponseEntity<String> uploadVideo(@PathVariable String movieId, @RequestParam("file") MultipartFile file)
             throws IOException {
         log.info("Video upload request for video : {}\t file size : {}MB", movieId, file.getSize() / MB_SIZE);

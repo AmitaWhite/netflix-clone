@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.netflix.videoservice.event.VideoUploadedEvent;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -28,7 +28,8 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Service
 @Slf4j
-@AllArgsConstructor
+// @AllArgsConstructor
+@RequiredArgsConstructor
 public class VideoService {
 
     private final S3Client s3Client;
@@ -64,6 +65,7 @@ public class VideoService {
                 .key(videoKey)
                 .contentType(file.getContentType())
                 .contentLength(file.getSize())
+                .bucket(bucketName)
                 .build();
 
         s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
