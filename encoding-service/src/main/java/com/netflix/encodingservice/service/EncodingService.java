@@ -13,6 +13,7 @@ import javax.management.RuntimeErrorException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.netflix.encodingservice.event.VideoEncodedEvent;
@@ -68,6 +69,7 @@ public class EncodingService {
      * 
      * @param event
      */
+    @Async
     public void encodeVideo(VideoUploadedEvent event) {
         log.info("Starting encoding platform for movie : {}", event.getMovieId());
 
@@ -91,7 +93,7 @@ public class EncodingService {
                 int bitrate = qualities[1];
                 int height = qualities[2];
 
-                String qualityDir = jobPath + "/encoded" + height + "p";
+                String qualityDir = jobPath + "/encoded/" + height + "p";
                 Files.createDirectories(Paths.get(qualityDir));
 
                 encodeToHLS(localVideoPath, qualityDir, width, height, bitrate);
@@ -184,6 +186,7 @@ public class EncodingService {
 
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         processBuilder.redirectErrorStream(true);
+        processBuilder.inheritIO();
         Process process = processBuilder.start();
         int exitCode = process.waitFor();
         if (exitCode != 0) {
@@ -229,7 +232,7 @@ public class EncodingService {
     private void uploadDirectoryToS3(File dir, String baseDir, String s3Prefix) {
         for (File file : dir.listFiles()) {
             if (file.isDirectory()) {
-                uploadDirectoryToS3(dir, baseDir, s3Prefix);
+                uploadDirectoryToS3(file, baseDir, s3Prefix);
             } else {
                 String relativePath = file.getAbsolutePath()
                         .substring(baseDir.length() + 1)
@@ -240,15 +243,21 @@ public class EncodingService {
                         ? "application/x-mpegURL"
                         : "video/MP2T";
 
-                PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                        .bucket(bucketName)
-                        .key(s3Key)
-                        .contentType(contentType)
-                        .build();
+                // promote logging priority to debugging with try-catch
 
-                s3Client.putObject(putObjectRequest, RequestBody.fromFile(file));
+                try {
+                    PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(s3Key)
+                            .contentType(contentType)
+                            .build();
 
-                log.debug("Uploaded : {}", s3Key);
+                    s3Client.putObject(putObjectRequest, RequestBody.fromFile(file));
+
+                    log.info("Uploaded : {}", s3Key);
+                } catch (Exception e) {
+                    log.error("Failed to upload files to S3 : {} - {}", file.getName(), e.getMessage());
+                }
             }
         }
 
@@ -268,7 +277,7 @@ public class EncodingService {
 
         // Add each quality to master playlist
         int[][] qualities = {
-                { 1_920, 5_000, 1_000 },
+                { 1_920, 5_000, 1_080 },
                 { 1_280, 2_800, 720 },
                 { 854, 1_200, 480 },
                 { 640, 800, 360 } };
@@ -278,7 +287,7 @@ public class EncodingService {
             int bitrate = q[1];
             int height = q[2];
 
-            master.append("#EXT-X-STREAM-INF:BADWIDTH=")
+            master.append("#EXT-X-STREAM-INF:BANDWIDTH=")
                     .append(bitrate * 1_000)
                     .append(", RESOLUTION=").append(width).append("x").append(height)
                     .append(", CODECS=\"avc1.42e01e,mp4a.40.2\"\n");
