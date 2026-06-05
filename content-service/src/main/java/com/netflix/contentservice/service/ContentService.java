@@ -129,4 +129,12 @@ public class ContentService {
 
         movieRepository.save(movie);
     }
+
+    public void updateVideoStatus(String movieId, VideoStatus videoStatus) {
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(RuntimeException::new);
+
+        movie.setVideoStatus(videoStatus);
+        movieRepository.save(movie);
+    }
 }

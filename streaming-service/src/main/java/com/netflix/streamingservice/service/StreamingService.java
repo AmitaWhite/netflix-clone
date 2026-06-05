@@ -160,10 +160,15 @@ public class StreamingService {
 
         ResponseInputStream<GetObjectResponse> response = s3Client.getObject(request);
 
-        return new BufferedReader(new InputStreamReader(response))
-                .lines()
-                .collect(Collectors.joining("\n"));
+        try (var isr = new InputStreamReader(response);
+                var br = new BufferedReader(isr);) {
 
+            return br.lines().collect(Collectors.joining("\n"));
+
+        } catch (Exception e) {
+            log.error("Failed to read filed from S3 for key : {}", s3Key, e);
+            throw new RuntimeException("S3 파일 읽기 실패", e);
+        }
     }
 
     private String rewriteM3u8SignedUrls(String m3u8Content, String basePath) {
