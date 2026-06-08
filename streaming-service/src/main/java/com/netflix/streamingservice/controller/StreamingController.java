@@ -31,6 +31,7 @@ public class StreamingController {
      * 
      * GET /api/vi/stream/{movieId}
      */
+    @GetMapping("/{movieId}")
     public ResponseEntity<StreamingResponse> getStreamingUrl(
             @PathVariable String movieId) {
         log.info("Streaming request for movie: {}", movieId);

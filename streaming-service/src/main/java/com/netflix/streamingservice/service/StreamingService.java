@@ -80,7 +80,7 @@ public class StreamingService {
 
         // [!important] Cache in redis for 55 minute
         // why? (5 minutes less that actual expiry to avoid edge cases)
-        redisTemplate.opsForValue().set(cachedUrl, presignedUrl, 55, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(cacheKey, presignedUrl, 55, TimeUnit.MINUTES);
 
         log.info("Streaming URL generated and cached for movie : {}", movieId);
 
