@@ -1,10 +1,12 @@
 spring:
+  config:
+    import: "optional:file:.env[.properties]"
   application:
     name: content-service
   datasource:
-    url: jdbc:mysql://localhost:3307/
-    username:
-    password:
+    url: jdbc:mysql://localhost:3307/${MYSQL_DATABASE}?sslMode=DISABLED&characterEncoding=UTF-8
+    username: ${MYSQL_DB_USER}
+    password: ${MYSQL_ROOT_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -13,6 +15,24 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: content-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "*"
+            use:
+              type:
+                headers: false
+            value:
+              default:
+                type: java.util.HashMap
 
 server:
   port: 8081

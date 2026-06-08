@@ -1,12 +1,14 @@
 spring:
+  config:
+    import: "optional:file:.env[.properties]"
   application:
     name: encoding-service
   kafka:
     consumer:
       group-id: encoding-service-group
       auto-offset-reset: earliest
-      key-serializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring:
           json:
@@ -23,18 +25,14 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 server:
   port: 8083
-
 #AWS Configuration
 aws:
-  access-key: ${AWS_ACCESS_KEY:my-access-key}
-  secret-key: ${AWS_SECRET_KEY:my-secret-key}
-  region: ${AWS_REGION:my-region}
+  region: ${AWS_REGION:us-east-1}
   s3:
-  bucket-name: ${AWS_BUCKET_NAME:abcdbucket}
-
+    bucket-name: ${AWS_BUCKET_NAME}
 # FFmpeg Configuration
 ffmpeg:
-  path: ${FFMPEG_PATH:ffmpeg}
+  path: ${FFMPEG_PATH:/usr/local/bin/ffmpeg}
 
 # Temp directory for encoding
 encoding:
@@ -44,5 +42,4 @@ management:
   endpoints:
     web:
       exposure:
-        include:
-          - health, info
+        include: health, info

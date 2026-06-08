@@ -1,9 +1,10 @@
 spring:
+  config:
+    import: "optional:file:.env[.properties]"
   application:
     name: video-service
   kafka:
-    bootstrap-servers:
-      - localhost:9092
+    bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -13,18 +14,19 @@ spring:
       max-request-size: 2GB
 server:
   port: 8082
+  tomcat:
+    # 5분 (300,000ms)
+    connection-timeout: 300000
+    keep-alive-timeout: 300000
 
 # Actuator
 management:
   endpoints:
     web:
       exposure:
-        include:
-          - health,info
+        include: health,info
 #AWS Configuration
 aws:
-  access-key: ${AWS_ACCESS_KEY:my-access-key}
-  secret-key: ${AWS_SECRET_KEY:my-secret-key}
-  region: ${AWS_REGION:my-region}
+  region: ${AWS_REGION:us-east-1}
   s3:
-  bucket-name: ${AWS_BUCKET_NAME:abcdbucket}
+    bucket-name: "${AWS_BUCKET_NAME}"
